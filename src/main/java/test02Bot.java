@@ -39,20 +39,11 @@ public class test02Bot extends TelegramLongPollingBot {
         message.setChatId(chat_id).setText(message_text);
         HashMap<Integer, String> formatCheckRes  = new HashMap<>();
         HashMap<Integer, String> findListnameRes  = new HashMap<>();
-        if (!Arrays.stream(cmdList).parallel().anyMatch(command::contains)){
-            message.setText("Oops. I didn't recognise that command. Use /help to see the available commands! ");
-            try {
-                execute(message);
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
-            }
 
-        }
-
-
-        else if (command.equals("/start") || command.equals("/new")){
+       if (command.equals("/start") || command.equals("/new")){
             //System.out.println("ohi there, " +update.getMessage().getFrom().getUserName() + "!");
             message.setText("hello there, " +update.getMessage().getFrom().getUserName() + "!");
+            System.out.println("start()");
 
             code = 1;
             //todo: make default responses for each command a global var to call
@@ -181,7 +172,7 @@ public class test02Bot extends TelegramLongPollingBot {
 
 
                     if (formatCheckRes.get(0).equals("1")){
-                        String listName = getListInfoFromInput(input).get(0);
+                        String listName = getListInfoFromInput(input).get(0).replaceAll("\\s+","").toLowerCase();
                         String listItems = getListInfoFromInput(input).get(1);
                         findListnameRes = ifListexist(user_id, listName);
 
@@ -190,12 +181,12 @@ public class test02Bot extends TelegramLongPollingBot {
                             addItem(user_id, listName, listItems);
                             message.setText("Item added!");
                         }
-                        if (code == 2 && findListnameRes.get(0).equals("1")){
+                        else if (code == 2 && findListnameRes.get(0).equals("1")){
                             updatelist(user_id, listName, listItems);
                             message.setText("List updated!");
                         }
                         // add list + lname not found -> add
-                        else if (code == 1 && findListnameRes.get(0).equals("0")) {
+                        else if (( (code == 1 || code == 2) && findListnameRes.get(0).equals("0"))) {
                             addList(user_id, username, listName, listItems);
                             message.setText("List added!");
                         }
@@ -228,7 +219,7 @@ public class test02Bot extends TelegramLongPollingBot {
 
                 // /del list
                 else {
-                    input = update.getMessage().getText().trim().toLowerCase();
+                    input = update.getMessage().getText().trim().toLowerCase().replaceAll("\\s+","");
 
                     formatCheckRes = checkInput(code, input);
 
@@ -276,15 +267,27 @@ public class test02Bot extends TelegramLongPollingBot {
         }
 
 
+        //set chatID to reply to
+        //message.setChatId(update.getMessage().getChatId());
+
+        //send out the message
+        //try {
+        //    execute(message);
+        //} catch (TelegramApiException e) {
+        //    e.printStackTrace();
+       // }
     }
 
-    public String getBotUsername() {
-        return "test02_bot";
-    }
+        public String getBotUsername() {
+            return "test02_bot";
+        }
 
-    public String getBotToken() {
-        return "YOUR TOKEN";
-    }
+        public String getBotToken() {
+            return "YOUR TOKEN";
+        }
+
+
+
 
     public void addList(long uid, String userName, String listName, String listItems ) {
         System.out.println("addlist()");
@@ -724,3 +727,4 @@ public class test02Bot extends TelegramLongPollingBot {
 
 
 }
+
